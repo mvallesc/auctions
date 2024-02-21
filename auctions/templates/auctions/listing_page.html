@@ -1,0 +1,100 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>Listing: {{ listing.title }}</h2>
+
+    {% if user.is_authenticated %}
+        {% if in_watchlist %}
+            <p><a href="{% url 'remove_from_watchlist' listing_id=listing.id %}">Remove from Watchlist</a></p>
+        {% else %}
+            <p><a href="{% url 'add_to_watchlist' listing_id=listing.id %}">Add to Watchlist</a></p>
+        {% endif %}
+    {% endif %}
+
+    {% if listing.image_url %}
+    <img src="{{ listing.image_url }}" alt="Listing Image">
+    {% endif %}
+
+    <p>Description: {{ listing.description }}</p>
+    <strong>${{ listing.current_price }}</strong>
+
+
+    {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+
+    {% if user.is_authenticated %}
+        {% if user_won %}
+            <h3>Congratulations! You won this auction!</h3>
+        {% endif %}
+
+
+        {% if listing.is_active %}
+        <form method="post" action="{% url 'listing_page' listing_id=listing.id %}">
+            {% csrf_token %}
+            <label for="bid_amount">Your Bid:</label>
+            <input type="text" name="bid_amount" required>
+            <button type="submit" class="btn btn-primary">Place Bid</button>
+        </form>
+        {% endif %}
+
+
+        {% if can_close_auction %}
+            <form method="post" action="{% url 'listing_page' listing_id=listing.id %}">
+                {% csrf_token %}
+                <button type="submit" name="close_auction" class="btn btn-primary">Close Auction</button>
+            </form>
+        {% endif %}
+    {% endif %}
+
+
+    {% if bids %}
+        <h3>Previous Bids:</h3>
+        <ul>
+            {% for bid in bids %}
+                <li>{{ bid.user.username }}: ${{ bid.amount }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+
+    <h3>Details</h3>
+    <p>Created by: {{ listing.seller.username }}</p>
+    {% if listing.category %}
+        <p>Category: {{ listing.category }}</p>
+    {% else %}
+        <p>Category: No Category Listed</p>
+    {% endif %}
+
+    <h3>Comments</h3>
+    {% if user.is_authenticated %}
+        <h4>Add a Comment</h4>
+        <form method="post" action="{% url 'listing_page' listing_id=listing.id %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <textarea class="form-control" name="comment_content" placeholder="Add your comment"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit Comment</button>
+        </form>
+    {% endif %}
+
+    {% if comments %}
+        <ul>
+            {% for comment in comments %}
+                <li>
+                    <strong>{{ comment.user.username }}</strong>
+                    <p>{{ comment.content }}</p>
+                    <p>{{ comment.created_at }}</p>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No comments yet.</p>
+    {% endif %}
+
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    {% if category %}
+    <h2>{{ category }} Listings</h2>
+    {% else %}
+    <h2>Active Listings</h2>
+    {% endif %}
+
+    <ul>
+        {% for listing in active_listings %}
+            <li>
+                <h3><a href="{% url 'listing_page' listing_id=listing.id %}">{{ listing.title }}</a></h3>
+                <p><strong>Price:</strong> ${{ listing.current_price }}</p>
+                <p>Description: {{ listing.description }}</p>
+                <p>Created {{ listing.created_at }}</p>
+                {% if listing.image_url %}
+                    <img src="{{ listing.image_url }}" alt="Listing Image">
+                {% endif %}
+                <hr>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}
